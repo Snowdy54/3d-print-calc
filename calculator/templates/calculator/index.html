@@ -3,52 +3,97 @@
 {% block content %}
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
-            <h2 class="fw-bold">Моя 3D Студия</h2>
+            <h2 class="fw-bold text-dark">Моя 3D Студия</h2>
         </div>
         <div class="col-md-6 text-end">
-            <span class="badge bg-primary fs-5 p-3 shadow-sm">
-                Общая стоимость: {{ total_revenue|floatformat:2 }} руб.
-            </span>
+            <div class="p-3 bg-primary text-white rounded shadow-sm d-inline-block">
+                <span class="small d-block text-uppercase opacity-75">Общая себестоимость</span>
+                <span class="fs-4 fw-bold">{{ total_revenue|floatformat:2 }} руб.</span>
+            </div>
         </div>
     </div>
 
-    <div class="card shadow border-0 mb-4 p-3">
-        {% if chart %}
-            {{ chart|safe }}
-        {% else %}
-            <p class="text-center text-muted">График загружается...</p>
-        {% endif %}
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0 fw-bold">Новый расчет</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">{{ form.printer.label }}</label>
+                            {{ form.printer }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">{{ form.filament.label }}</label>
+                            {{ form.filament }}
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">{{ form.model_weight_g.label }}</label>
+                                {{ form.model_weight_g }}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">{{ form.print_time_hours.label }}</label>
+                                {{ form.print_time_hours }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm">
+                            Добавить в аналитику
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow border-0 h-100 p-2">
+                {% if chart %}
+                    {{ chart|safe }}
+                {% else %}
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <p class="text-muted">Недостаточно данных для графика</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
     <div class="card shadow border-0 overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead class="table-light text-secondary">
                     <tr>
                         <th class="ps-4">ID</th>
-                        <th>Принтер</th>
+                        <th>Оборудование</th>
                         <th>Материал</th>
-                        <th>Вес (г)</th>
-                        <th>Время (ч)</th>
-                        <th class="text-end pe-4">Себестоимость</th>
+                        <th>Параметры</th>
+                        <th class="text-end">Себестоимость</th>
+                        <th class="text-end pe-4">Рекомендованная цена (x2.5)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
                     <tr>
-                        <td class="ps-4 text-muted">#{{ order.id }}</td>
-                        <td class="fw-bold">{{ order.printer.name }}</td>
+                        <td class="ps-4 text-muted small">#{{ order.id }}</td>
+                        <td><div class="fw-bold">{{ order.printer.name }}</div></td>
                         <td>{{ order.filament.name }}</td>
-                        <td>{{ order.model_weight_g }}г</td>
-                        <td>{{ order.print_time_hours }}ч</td>
-                        <td class="text-end pe-4 fw-bold text-success">
-                            {{ order.total_cost }} руб.
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ order.model_weight_g }}г</span>
+                            <span class="badge bg-light text-dark border">{{ order.print_time_hours }}ч</span>
+                        </td>
+                        <td class="text-end fw-bold text-success">
+                            {{ order.total_cost }} ₽
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="badge bg-info text-dark p-2 shadow-sm">
+                                {% widthratio order.total_cost 1 2.5 %} ₽
+                            </span>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">Заказов пока нет</td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
