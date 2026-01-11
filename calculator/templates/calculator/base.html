@@ -10,9 +10,8 @@
     <nav class="navbar navbar-dark navbar-custom shadow-sm mb-4">
         <div class="container">
             <a class="navbar-brand" href="/">3D-Print Analytics</a>
-            <div class="navbar-text text-info">
-                {% if usd_rate %}
-                    USD/RUB: <strong>{{ usd_rate|floatformat:2 }}</strong>
+                <div class="navbar-text text-primary fw-bold"> {% if usd_rate %}
+                    <span style="letter-spacing: 0.5px;">USD/RUB: {{ usd_rate|floatformat:2 }}</span>
                 {% endif %}
             </div>
         </div>

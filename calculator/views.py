@@ -36,16 +36,36 @@ def index(request):
         total_turnover=Sum('total_cost')
     ).order_by('-total_orders')
 
+    common_legend_style = dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.3,
+        xanchor="center",
+        x=0.5
+    )
+
+
     printer_data = orders.values('printer__name').annotate(total=Sum('total_cost'))
     fig_printer = px.pie(printer_data, names='printer__name', values='total', 
                          hole=0.4, title="Выручка по принтерам (₽)")
-    fig_printer.update_layout(margin=dict(l=10, r=10, t=40, b=10), showlegend=False)
+
+    fig_printer.update_layout(
+        margin=dict(l=10, r=10, t=40, b=80), 
+        showlegend=True,
+        legend=common_legend_style
+    )
     chart_printer_html = fig_printer.to_html(full_html=False, include_plotlyjs='cdn')
+
 
     filament_chart_data = orders.values('filament__name').annotate(total_g=Sum('model_weight_g'))
     fig_filament = px.pie(filament_chart_data, names='filament__name', values='total_g', 
                           hole=0.4, title="Расход пластика (г)")
-    fig_filament.update_layout(margin=dict(l=10, r=10, t=40, b=10), showlegend=False)
+    
+    fig_filament.update_layout(
+        margin=dict(l=10, r=10, t=40, b=80), 
+        showlegend=True,
+        legend=common_legend_style
+    )
     chart_filament_html = fig_filament.to_html(full_html=False, include_plotlyjs='cdn')
 
     for order in orders:

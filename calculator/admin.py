@@ -3,12 +3,12 @@ from .models import Printer, Filament, PrintOrder, StudioSettings
 
 @admin.register(Printer)
 class PrinterAdmin(admin.ModelAdmin):
-    list_display = ('name', 'power_consumption', 'purchase_price', 'owner')
+    list_display = ('name', 'power_consumption', 'purchase_price') 
     search_fields = ('name',)
 
 @admin.register(Filament)
 class FilamentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price_per_spool', 'weight_g', 'owner')
+    list_display = ('name', 'price_per_spool', 'weight_g')
     list_filter = ('name',)
 
 @admin.register(PrintOrder)
