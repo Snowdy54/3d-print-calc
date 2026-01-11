@@ -3,97 +3,116 @@
 {% block content %}
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
-            <h2 class="fw-bold text-dark">Моя 3D Студия</h2>
-        </div>
-        <div class="col-md-6 text-end">
-            <div class="p-3 bg-primary text-white rounded shadow-sm d-inline-block">
+            <h2 class="fw-bold text-dark m-0">Моя 3D Студия</h2>
+            </div>
+        <div class="col-md-6 d-flex justify-content-end"> 
+            <div class="p-3 bg-primary text-white rounded shadow-sm text-center" style="min-width: 250px;">
                 <span class="small d-block text-uppercase opacity-75">Общая себестоимость</span>
-                <span class="fs-4 fw-bold">{{ total_revenue|floatformat:2 }} руб.</span>
+                <span class="fs-4 fw-bold">{{ total_revenue|floatformat:2 }} ₽</span>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-lg-4 mb-4 mb-lg-0">
-            <div class="card shadow border-0 h-100">
-                <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-0 fw-bold">Новый расчет</h5>
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-lg-4 col-md-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h6 class="mb-0 fw-bold text-secondary">Новый расчет</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3">
                     <form method="post">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">{{ form.printer.label }}</label>
-                            {{ form.printer }}
+                        <div class="mb-2"><label class="small fw-bold text-muted small">Оборудование</label>{{ form.printer }}</div>
+                        <div class="mb-2"><label class="small fw-bold text-muted small">Материал</label>{{ form.filament }}</div>
+                        <div class="row g-2">
+                            <div class="col-6"><label class="small fw-bold text-muted small">Вес (г)</label>{{ form.model_weight_g }}</div>
+                            <div class="col-6"><label class="small fw-bold text-muted small">Время (ч)</label>{{ form.print_time_hours }}</div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">{{ form.filament.label }}</label>
-                            {{ form.filament }}
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label small fw-bold">{{ form.model_weight_g.label }}</label>
-                                {{ form.model_weight_g }}
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label small fw-bold">{{ form.print_time_hours.label }}</label>
-                                {{ form.print_time_hours }}
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm">
-                            Добавить в аналитику
-                        </button>
+                        <button type="submit" class="btn btn-success w-100 fw-bold mt-3 py-2">Рассчитать</button>
                     </form>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-8">
-            <div class="card shadow border-0 h-100 p-2">
-                {% if chart %}
-                    {{ chart|safe }}
-                {% else %}
-                    <div class="d-flex justify-content-center align-items-center h-100">
-                        <p class="text-muted">Недостаточно данных для графика</p>
-                    </div>
-                {% endif %}
+        
+        <div class="col-xl-4 col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100 p-2 d-flex align-items-center justify-content-center" style="min-height: 300px; overflow: hidden;">
+                <div style="width: 100%;">{{ chart|safe }}</div>
+            </div>
+        </div>
+        
+        <div class="col-xl-5 col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100 p-2 d-flex align-items-center justify-content-center" style="min-height: 300px; overflow: hidden;">
+                <div style="width: 100%;">{{ filament_chart|safe }}</div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow border-0 overflow-hidden">
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-white py-3 border-bottom-0">
+            <h5 class="mb-0 fw-bold text-dark">Оборот по материалам</h5>
+        </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-secondary">
+            <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-light text-secondary small text-uppercase">
                     <tr>
-                        <th class="ps-4">ID</th>
-                        <th>Оборудование</th>
-                        <th>Материал</th>
-                        <th class="text-center">Параметры</th>
-                        <th class="text-center">Себестоимость</th> <th class="text-center pe-4">Рекомендованная цена</th> </tr>
+                        <th class="ps-4 text-start">Тип пластика</th>
+                        <th>Заказов</th>
+                        <th>Общий расход</th>
+                        <th class="pe-4">Общий оборот (₽)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in filament_stats %}
+                    <tr>
+                        <td class="ps-4 text-start fw-bold text-dark">{{ stat.filament__name }}</td>
+                        <td><span class="badge rounded-pill bg-info text-dark px-3">{{ stat.total_orders }}</span></td>
+                        <td class="text-muted small">{{ stat.total_weight }} г</td>
+                        <td class="pe-4 fw-bold text-success">{{ stat.total_turnover|floatformat:2 }} ₽</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 border-bottom-0">
+            <h5 class="mb-0 fw-bold text-dark">История заказов</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-light text-secondary small text-uppercase">
+                    <tr>
+                        <th class="ps-4 text-start">ID</th>
+                        <th class="text-start">Оборудование</th>
+                        <th class="text-start">Материал</th>
+                        <th>Параметры</th>
+                        <th>Себестоимость</th>
+                        <th class="text-center">Рекомендуемая цена (x{{ markup }})</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
                     <tr>
-                        <td class="ps-4 text-muted small">#{{ order.id }}</td>
-                        <td><div class="fw-bold text-dark">{{ order.printer.name }}</div></td>
-                        <td><span class="text-secondary small">{{ order.filament.name }}</span></td>
-                        <td class="text-center"> <span class="badge bg-light text-dark border fw-normal">{{ order.model_weight_g }}г</span>
+                        <td class="ps-4 text-start text-muted small">#{{ order.id }}</td>
+                        <td class="text-start fw-bold">{{ order.printer.name }}</td>
+                        <td class="text-start small text-muted">{{ order.filament.name }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-normal">{{ order.model_weight_g }}г</span>
                             <span class="badge bg-light text-dark border fw-normal">{{ order.print_time_hours }}ч</span>
                         </td>
-                        <td class="text-center fw-bold text-success"> {{ order.total_cost|floatformat:2 }} ₽
-                        </td>
-                        <td class="text-center pe-4"> <div class="d-inline-block">
-                                <span class="badge bg-primary fs-6 p-2 shadow-sm" style="min-width: 110px;">
-                                    {% widthratio order.total_cost 1 2.5 %} ₽
+                        <td class="fw-bold text-success">{{ order.total_cost|floatformat:2 }} ₽</td>
+                        <td class="text-center">
+                            <div class="d-inline-block py-2">
+                                <span class="badge bg-primary px-4 py-2 fs-6 shadow-sm" style="min-width: 140px;">
+                                    {{ order.recommended_price|floatformat:2 }} ₽
                                 </span>
-                                <small class="d-block text-primary fw-bold mt-1" style="font-size: 0.7rem;">
-                                    Прибыль: +{% widthratio order.total_cost 1 1.5 %} ₽
-                                </small>
+                                <div class="text-primary fw-bold mt-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                    Прибыль: +{{ order.profit|floatformat:2 }} ₽
+                                </div>
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
                     {% endfor %}
                 </tbody>
             </table>
