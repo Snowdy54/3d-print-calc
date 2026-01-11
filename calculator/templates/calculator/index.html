@@ -69,28 +69,28 @@
                         <th class="ps-4">ID</th>
                         <th>Оборудование</th>
                         <th>Материал</th>
-                        <th>Параметры</th>
-                        <th class="text-end">Себестоимость</th>
-                        <th class="text-end pe-4">Рекомендованная цена (x2.5)</th>
-                    </tr>
+                        <th class="text-center">Параметры</th>
+                        <th class="text-center">Себестоимость</th> <th class="text-center pe-4">Рекомендованная цена</th> </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
                     <tr>
                         <td class="ps-4 text-muted small">#{{ order.id }}</td>
-                        <td><div class="fw-bold">{{ order.printer.name }}</div></td>
-                        <td>{{ order.filament.name }}</td>
-                        <td>
-                            <span class="badge bg-light text-dark border">{{ order.model_weight_g }}г</span>
-                            <span class="badge bg-light text-dark border">{{ order.print_time_hours }}ч</span>
+                        <td><div class="fw-bold text-dark">{{ order.printer.name }}</div></td>
+                        <td><span class="text-secondary small">{{ order.filament.name }}</span></td>
+                        <td class="text-center"> <span class="badge bg-light text-dark border fw-normal">{{ order.model_weight_g }}г</span>
+                            <span class="badge bg-light text-dark border fw-normal">{{ order.print_time_hours }}ч</span>
                         </td>
-                        <td class="text-end fw-bold text-success">
-                            {{ order.total_cost }} ₽
+                        <td class="text-center fw-bold text-success"> {{ order.total_cost|floatformat:2 }} ₽
                         </td>
-                        <td class="text-end pe-4">
-                            <span class="badge bg-info text-dark p-2 shadow-sm">
-                                {% widthratio order.total_cost 1 2.5 %} ₽
-                            </span>
+                        <td class="text-center pe-4"> <div class="d-inline-block">
+                                <span class="badge bg-primary fs-6 p-2 shadow-sm" style="min-width: 110px;">
+                                    {% widthratio order.total_cost 1 2.5 %} ₽
+                                </span>
+                                <small class="d-block text-primary fw-bold mt-1" style="font-size: 0.7rem;">
+                                    Прибыль: +{% widthratio order.total_cost 1 1.5 %} ₽
+                                </small>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
