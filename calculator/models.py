@@ -37,15 +37,10 @@ class PrintOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     def calculate_cost(self, usd_rate):
-        # 1. Стоимость пластика (используем правильные имена полей!)
-        # price_per_spool (USD) * курс / weight_g (вес катушки)
         filament_cost_rub = self.filament.price_per_spool * Decimal(str(usd_rate))
         cost_per_gram = filament_cost_rub / self.filament.weight_g
         material_total = Decimal(str(self.model_weight_g)) * cost_per_gram
 
-        # 2. Электричество и амортизация
-        # Т.к. в StudioSettings их нет, берем фиксированные или добавь их в настройки
-        # Пока поставим заглушку 0, чтобы не падало, или добавь поля в модель Printer
         electricity_cost = Decimal('0') 
         depreciation = Decimal('0')
 
@@ -53,9 +48,7 @@ class PrintOrder(models.Model):
         return self.total_cost
 
     def save(self, *args, **kwargs):
-        # Вырываем usd_rate из аргументов (если передавали)
         usd_rate = kwargs.pop('usd_rate', 85.0) 
-        # Вызываем наш расчет перед сохранением
         self.calculate_cost(usd_rate)
         super().save(*args, **kwargs)
 

@@ -21,12 +21,11 @@ def index(request):
     settings = StudioSettings.objects.first()
     markup = settings.markup_coefficient if settings else Decimal('2.5')
     
-    # 1. Инициализируем пустую форму сразу для GET-запроса
     form = PrintOrderForm()
-    preview_data = {} # Для хранения данных предпросмотра
+    preview_data = {}
 
     if request.method == 'POST':
-        form = PrintOrderForm(request.POST) # Перезаписываем форму данными из POST
+        form = PrintOrderForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
             
@@ -41,10 +40,7 @@ def index(request):
                     'preview_price': order.total_cost * markup,
                     'preview_profit': (order.total_cost * markup) - order.total_cost,
                 }
-                # НЕ делаем здесь return render, а позволяем коду идти дальше, 
-                # чтобы графики и таблица ниже тоже загрузились.
 
-    # 2. Математика для графиков и списка (оставляем как было)
     filament_stats = orders.values('filament__name').annotate(
         total_orders=Count('id'),
         total_weight=Sum('model_weight_g'),
@@ -93,11 +89,10 @@ def index(request):
         'usd_rate': usd_rate,
         'chart': chart_printer_html,
         'filament_chart': chart_filament_html,
-        'form': form, # Теперь form всегда определена
+        'form': form,
         'markup': markup,
         'filament_stats': filament_stats,
     }
-    # Добавляем данные предпросмотра, если они есть
     context.update(preview_data)
 
     return render(request, 'calculator/index.html', context)
