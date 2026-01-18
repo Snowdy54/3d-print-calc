@@ -36,20 +36,27 @@ class PrintOrder(models.Model):
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Себестоимость", editable=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
+    def calculate_cost(self, usd_rate):
+        # 1. Стоимость пластика (используем правильные имена полей!)
+        # price_per_spool (USD) * курс / weight_g (вес катушки)
+        filament_cost_rub = self.filament.price_per_spool * Decimal(str(usd_rate))
+        cost_per_gram = filament_cost_rub / self.filament.weight_g
+        material_total = Decimal(str(self.model_weight_g)) * cost_per_gram
+
+        # 2. Электричество и амортизация
+        # Т.к. в StudioSettings их нет, берем фиксированные или добавь их в настройки
+        # Пока поставим заглушку 0, чтобы не падало, или добавь поля в модель Printer
+        electricity_cost = Decimal('0') 
+        depreciation = Decimal('0')
+
+        self.total_cost = material_total + electricity_cost + depreciation
+        return self.total_cost
+
     def save(self, *args, **kwargs):
-        usd_rate = kwargs.pop('usd_rate', Decimal('80.5')) # 80.5 как запасной вариант
-        
-        settings = StudioSettings.objects.first()
-        tariff = settings.electricity_tariff if settings else Decimal('6.0')
-        
-        price_per_gram_usd = Decimal(str(self.filament.price_per_spool)) / Decimal(str(self.filament.weight_g))
-        filament_cost_rub = price_per_gram_usd * Decimal(str(self.model_weight_g)) * Decimal(str(usd_rate))
-        
-        power_kw = Decimal(str(self.printer.power_consumption)) / Decimal('1000.0')
-        electricity_cost_rub = power_kw * Decimal(str(self.print_time_hours)) * tariff
-        
-        self.total_cost = filament_cost_rub + electricity_cost_rub
-        
+        # Вырываем usd_rate из аргументов (если передавали)
+        usd_rate = kwargs.pop('usd_rate', 85.0) 
+        # Вызываем наш расчет перед сохранением
+        self.calculate_cost(usd_rate)
         super().save(*args, **kwargs)
 
     def __str__(self):

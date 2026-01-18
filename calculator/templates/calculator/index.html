@@ -22,14 +22,34 @@
                 <div class="card-body p-3">
                     <form method="post">
                         {% csrf_token %}
-                        <div class="mb-2"><label class="small fw-bold text-muted small">Оборудование</label>{{ form.printer }}</div>
-                        <div class="mb-2"><label class="small fw-bold text-muted small">Материал</label>{{ form.filament }}</div>
+                        <div class="mb-2"><label class="small fw-bold text-muted">Оборудование</label>{{ form.printer }}</div>
+                        <div class="mb-2"><label class="small fw-bold text-muted">Материал</label>{{ form.filament }}</div>
                         <div class="row g-2">
-                            <div class="col-6"><label class="small fw-bold text-muted small">Вес (г)</label>{{ form.model_weight_g }}</div>
-                            <div class="col-6"><label class="small fw-bold text-muted small">Время (ч)</label>{{ form.print_time_hours }}</div>
+                            <div class="col-6"><label class="small fw-bold text-muted">Вес (г)</label>{{ form.model_weight_g }}</div>
+                            <div class="col-6"><label class="small fw-bold text-muted">Время (ч)</label>{{ form.print_time_hours }}</div>
                         </div>
-                        <button type="submit" class="btn btn-success w-100 fw-bold mt-3 py-2">Рассчитать</button>
+                        
+                        <div class="row g-2 mt-3">
+                            <div class="col-12">
+                                <button type="submit" name="check_price" class="btn btn-outline-primary w-100 fw-bold py-2 mb-2">
+                                    <i class="bi bi-eye"></i> Проверить стоимость
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" name="save_order" class="btn btn-success w-100 fw-bold py-2">
+                                    <i class="bi bi-save"></i> Рассчитать и сохранить
+                                </button>
+                            </div>
+                        </div>
                     </form>
+
+                    {% if preview_cost %}
+                    <div class="alert alert-primary border-0 shadow-sm mt-3 p-2 text-center" style="background-color: #f0f7ff;">
+                        <div class="small text-uppercase text-muted" style="font-size: 0.65rem;">Предварительный итог:</div>
+                        <div class="fw-bold text-dark">{{ preview_price|floatformat:2 }} ₽</div>
+                        <div class="text-primary small" style="font-size: 0.7rem;">Себестоимость: {{ preview_cost|floatformat:2 }} ₽</div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -21,15 +21,30 @@ def index(request):
     settings = StudioSettings.objects.first()
     markup = settings.markup_coefficient if settings else Decimal('2.5')
     
+    # 1. Инициализируем пустую форму сразу для GET-запроса
+    form = PrintOrderForm()
+    preview_data = {} # Для хранения данных предпросмотра
+
     if request.method == 'POST':
-        form = PrintOrderForm(request.POST)
+        form = PrintOrderForm(request.POST) # Перезаписываем форму данными из POST
         if form.is_valid():
             order = form.save(commit=False)
-            order.save(usd_rate=usd_rate)
-            return redirect('index')
-    else:
-        form = PrintOrderForm()
+            
+            if 'save_order' in request.POST:
+                order.save(usd_rate=usd_rate)
+                return redirect('index')
 
+            elif 'check_price' in request.POST:
+                order.calculate_cost(usd_rate)
+                preview_data = {
+                    'preview_cost': order.total_cost,
+                    'preview_price': order.total_cost * markup,
+                    'preview_profit': (order.total_cost * markup) - order.total_cost,
+                }
+                # НЕ делаем здесь return render, а позволяем коду идти дальше, 
+                # чтобы графики и таблица ниже тоже загрузились.
+
+    # 2. Математика для графиков и списка (оставляем как было)
     filament_stats = orders.values('filament__name').annotate(
         total_orders=Count('id'),
         total_weight=Sum('model_weight_g'),
@@ -43,7 +58,6 @@ def index(request):
         xanchor="center",
         x=0.5
     )
-
 
     printer_data = orders.values('printer__name').annotate(total=Sum('total_cost'))
     fig_printer = px.pie(printer_data, names='printer__name', values='total', 
@@ -66,19 +80,24 @@ def index(request):
         showlegend=True,
         legend=common_legend_style
     )
+    chart_printer_html = fig_printer.to_html(full_html=False, include_plotlyjs='cdn')
     chart_filament_html = fig_filament.to_html(full_html=False, include_plotlyjs='cdn')
 
     for order in orders:
         order.recommended_price = order.total_cost * markup
         order.profit = order.total_cost * (markup - Decimal('1.0'))
 
-    return render(request, 'calculator/index.html', {
+    context = {
         'orders': orders,
         'total_revenue': total_revenue,
         'usd_rate': usd_rate,
         'chart': chart_printer_html,
         'filament_chart': chart_filament_html,
-        'form': form,
+        'form': form, # Теперь form всегда определена
         'markup': markup,
-        'filament_stats': filament_stats
-    })
+        'filament_stats': filament_stats,
+    }
+    # Добавляем данные предпросмотра, если они есть
+    context.update(preview_data)
+
+    return render(request, 'calculator/index.html', context)
