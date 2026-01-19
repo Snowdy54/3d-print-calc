@@ -52,7 +52,7 @@
 
 1.  **Клонируйте репозиторий:**
     ```bash
-    git clone [https://github.com/Snowdy54/3D-print-calc.git](https://github.com/Snowdy54/3D-print-calc.git)
+    git clone https://github.com/Snowdy54/3D-print-calc.git
     cd 3D-print-calc
     ```
 
