@@ -40,6 +40,8 @@ def index(request):
                     'preview_price': order.total_cost * markup,
                     'preview_profit': (order.total_cost * markup) - order.total_cost,
                 }
+                if request.headers.get('HX-Request'):
+                    return render(request, 'calculator/preview_partial.html', preview_data)
 
     filament_stats = orders.values('filament__name').annotate(
         total_orders=Count('id'),

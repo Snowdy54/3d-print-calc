@@ -1,0 +1,6 @@
+<div id="preview-result" class="alert alert-primary border-0 shadow-sm mt-3 p-2 text-center" style="background-color: #f0f7ff;">
+    <div class="small text-uppercase text-muted" style="font-size: 0.65rem;">Предварительный итог:</div>
+    <div class="fw-bold text-dark">{{ preview_price|floatformat:2 }} ₽</div>
+    <div class="text-primary small" style="font-size: 0.7rem;">Себестоимость: {{ preview_cost|floatformat:2 }} ₽</div>
+    <div class="text-success fw-bold" style="font-size: 0.7rem;">Прибыль: +{{ preview_profit|floatformat:2 }} ₽</div>
+</div>
