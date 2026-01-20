@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from decimal import Decimal
 
+
 class Printer(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название принтера")
     power_consumption = models.IntegerField(verbose_name="Мощность (Вт)")
@@ -40,9 +41,14 @@ class PrintOrder(models.Model):
         filament_cost_rub = self.filament.price_per_spool * Decimal(str(usd_rate))
         cost_per_gram = filament_cost_rub / self.filament.weight_g
         material_total = Decimal(str(self.model_weight_g)) * cost_per_gram
+        settings = StudioSettings.objects.first()
+        tariff = settings.electricity_tariff if settings else Decimal('6.0')
+        
+        power_kw = Decimal(str(self.printer.power_consumption)) / Decimal('1000')
+        electricity_cost = power_kw * Decimal(str(self.print_time_hours)) * tariff
 
-        electricity_cost = Decimal('0') 
-        depreciation = Decimal('0')
+        depreciation_per_hour = self.printer.purchase_price / Decimal('2000')
+        depreciation = depreciation_per_hour * Decimal(str(self.print_time_hours))
 
         self.total_cost = material_total + electricity_cost + depreciation
         return self.total_cost
